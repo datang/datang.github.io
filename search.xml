@@ -1,20 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title><![CDATA[Hello World]]></title>
-    <url>%2F2018%2F05%2F28%2Fhello-world%2F</url>
-    <content type="text"><![CDATA[Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new "My New Post" More info: Writing Run server1$ hexo server More info: Server Generate static files1$ hexo generate More info: Generating Deploy to remote sites1$ hexo deploy More info: Deployment]]></content>
+    <title><![CDATA[把windows10打造成软件开发的神器]]></title>
+    <url>%2F2018%2F05%2Fwindows10-hyper-v-ubuntu-coding%2F</url>
+    <content type="text"><![CDATA[工欲善其事，必先利其器。对于软件工程师来说有个舒服的coding环境真的太有必要了。一台Windows主机加上一台Ubuntu主机，然后使用神器Synergy来实现一套键盘/鼠标控制，这是我最舒服的方式。 跟了我多年的x200终于退役了，家里添置了新的台式电脑。那么问题来了，只有一台主机，要同时满足Windows+Ubuntu的需求应该怎么办呢？中间纠结的过程就不细说了，最终的解决方案是安装最新版Windows10系统，使用自带的Hyper-V安装Ubuntu Server 18.04虚拟机，再综合运用各种工具软件（Docker、PuTTY）。最终效果非常不错，Hyper-V的表现超出预期。 都说Mac OS是最适合程序员使用的操作系统，那么，我们就通过接下来的一波操作，打造最适合程序员的Windows系统。 友好的Windows10Hyper-V、PowerShell、Subsystem-Linux等等，Windows对程序员真的是越来越友好了。更何况日常办公Windows下各种应用软件体验也是非常的不错，没必要做Linux的卫道士，博采众长才是硬道理。 用Eclipse进行Java开发没什么好不好的，就是习惯了。推荐使用 Eclipse OXYGEN 安装 Eclipse IDE for Java EE Developers。 Visual Studio Code相比Atom，VS Code速度更快，支持各种插件，进行前端、python、php等的开发还是很爽的。推荐插件：Beautify Vscode-icons Projiect Manager Bracket Pair Colorizer Git History Auto Close Tag One Dark Pro。User Settings配置如下：12345678910&#123; "workbench.colorTheme": "One Dark Pro", "editor.fontFamily": "Menlo, Consolas, 'Courier New', monospace", "editor.fontSize": 15, "editor.fontWeight": "500", "git.ignoreMissingGitWarning": true, "workbench.iconTheme": "vscode-icons", "editor.formatOnPaste": true, "editor.fontLigatures": true&#125; 超出预期的Hyper-V曾经使用过VirtualBox、VMware，都是非常不错的虚拟化软件，如果是在虚拟机安装Windows或者Linux的桌面版，这两个都是不错的选择。当然，VMware是收费的，免费的可以用VMware Player。 这里要使用虚拟机安装Ubuntu Server，Hyper-V无意是首选。资源占用率极低，性能强，速度快，最重要的是： Hyper-V支持宿主机关机时虚拟机自动保存，宿主机开机时虚拟机自动开启。 也就是说你开机后就直接可以通过PuTTY登录到Ubuntu Server虚拟机，就像连接一个远程的永不宕机的Linux服务器一样，真是毫无存在感。 易用的Ubuntu从09年开始使用Ubuntu 8.04 LTS直到现在Ubuntu 18.04 LTS，期间折腾过双系统，Ubuntu虚拟机安装Windows，Windows虚拟机安装Ubuntu桌面版，双主机双系统，Ubuntu堪称最易用的Linux发行版，不管是桌面版还是服务器版。 使用spf13-vim配置你的Vim 1curl https://j.mp/spf13-vim3 -L &gt; spf13-vim.sh &amp;&amp; sh spf13-vim.sh 配置你的开发环境下载需要的安装包，解压到相应的位置，打开/etc/profile设置环境变量即可。 1234567891011121314# javaexport JAVA_HOME=/usr/local/java/jdk-10.0.1export JRE_HOME=$&#123;JAVA_HOME&#125;/jreexport CLASSPATH=.:$&#123;JAVA_HOME&#125;/lib:$&#123;JRE_HOME&#125;/libexport PATH=$&#123;JAVA_HOME&#125;/bin:$PATH# mavenexport MAVEN_HOME=/usr/local/maven/apache-maven-3.5.3export PATH=$MAVEN_HOME/bin:$PATH# nodejsexport NODE_HOME=/usr/local/nodejs/node-v8.11.2-linux-x64export PATH=$PATH:$NODE_HOME/binexport NODE_PATH=$NODE_HOME/lib/node_modules 使用docker安装需要的服务：Ubuntu 18.04从官方仓库安装最新版Docker的时候，需要注意在本文诞生的时候Docker还没有针对Ubuntu18.04的stale和edge版本，具体安装方法可以参考How to Install Docker on Ubuntu 18.04 LTS Bionic Beaver。强烈建议使用国内源，否则网络情况堪忧，例如：阿里云的apt仓库。使用Docker安装MySQL、Redis等。 虚拟机与宿主机文件共享Ubuntu Server挂载Windows10宿主机的共享文件夹应该是最优解决方案了。 虚拟机和宿主机同时操作共享文件夹，就好像在后台为Windows10添加了一个完整的Linux系统，这体验可以和Mac OS一较高下了吧。 Windows10设置文件夹共享 Ubuntu挂载Windows共享文件夹 设置开机自动挂载需要将磁盘的挂载命令写入/etc/fstab，这样就不用每次开机启动后手动进行挂载了。 查看你用户的ID及用户组ID（uid,gid），下面会用到。 1id $USER 打开/etc/fstab。 1sudo vi /etc/fstab 在文件的后面添加挂载命令。 1//192.168.1.18/workspace /mnt/workspace cifs defaults,username=[宿主机用户名],password=[宿主机密码],file_mode=0775,dir_mode=0775,uid=1000,gid=1004 0 2 当前用户主目录建立软连接。 12cd ~ln -s /mnt/workspace workspace 短小精悍而免费的PuTTYXShell、ScecureCRT的体验都非常的好，它们都是收费的。通过一波个性化的设置相信你会爱上这个短小精悍的PuTTY。 修改字体为Consolas，字号为16。 修改滚动行数 使用密钥对实现安全快捷的无密码登陆（PuTTYgen） 取消PuTTY右键粘贴功能 保持连接/防止自动断开连接 最佳的的颜色配置 1234567891011* Default Foreground: 255/255/255* Default Background: 51/51/51* ANSI Black: 77/77/77* ANSI Green: 152/251/152* ANSI Yellow: 240/230/140* ANSI Blue: 205/133/63* ANSI Blue Bold 135/206/235* ANSI Magenta: 255/222/173 or 205/92/92* ANSI Cyan: 255/160/160* ANSI Cyan Bold: 255/215/0* ANSI White: 245/222/179 使用MTPuTTYMTPuTTY是一个PuTTY多标签的插件，方便进行session管理。使用时记得快捷键ctrl+b、ctrl+m、ctrl+t，控制侧边栏、主菜单、工具栏的隐藏和展现。唯一不好的地方就是在使用alt+tab切换窗口的时候，MTPuTTY需要切换两次才能到下一个窗口，]]></content>
       <tags>
-        <tag>tag1</tag>
-        <tag>tag2</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[测试一下]]></title>
-    <url>%2F2018%2F05%2F28%2Ftest%2F</url>
-    <content type="text"><![CDATA[你好，我在测试自己的博客系统。 标题1标题21print("hello")]]></content>
-      <tags>
-        <tag>测试</tag>
+        <tag>效率</tag>
       </tags>
   </entry>
 </search>
